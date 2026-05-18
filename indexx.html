@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Yuka Unbanned</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: #161b22;
+            border-right: 1px solid #30363d;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .sidebar-header h1 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f0f6fc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-header h1 i {
+            color: #58a6ff;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            color: #8b949e;
+            margin-top: 4px;
+        }
+
+        .nav-menu {
+            padding: 12px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            color: #8b949e;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.15s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .nav-item:hover {
+            background: #21262d;
+            color: #c9d1d9;
+        }
+
+        .nav-item.active {
+            background: #238636;
+            color: #fff;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: #30363d;
+            margin: 8px 16px;
+        }
+
+        .nav-label {
+            padding: 8px 20px 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 240px;
+            padding: 24px 32px;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .page-header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #f0f6fc;
+        }
+
+        .page-header .breadcrumb {
+            font-size: 12px;
+            color: #8b949e;
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-badge.online {
+            background: rgba(35, 134, 54, 0.15);
+            color: #3fb950;
+            border: 1px solid rgba(63, 185, 80, 0.3);
+        }
+
+        .status-badge.online::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #3fb950;
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #f0f6fc;
+        }
+
+        .stat-card .stat-change {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .stat-change.up { color: #3fb950; }
+        .stat-change.down { color: #f85149; }
+
+        /* Panel */
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #f0f6fc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-body {
+            padding: 20px;
+        }
+
+        /* Form */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #8b949e;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.15s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #484f58;
+        }
+
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b949e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Button */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            border: 1px solid;
+            transition: all 0.15s;
+        }
+
+        .btn-primary {
+            background: #238636;
+            border-color: #238636;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #2ea043;
+            border-color: #2ea043;
+        }
+
+        .btn-danger {
+            background: #da3633;
+            border-color: #da3633;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #f85149;
+            border-color: #f85149;
+        }
+
+        .btn-secondary {
+            background: #21262d;
+            border-color: #30363d;
+            color: #c9d1d9;
+        }
+
+        .btn-secondary:hover {
+            background: #30363d;
+            border-color: #8b949e;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-lg {
+            padding: 14px 24px;
+            font-size: 16px;
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .data-table th {
+            color: #8b949e;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            background: #0d1117;
+        }
+
+        .data-table tr:hover td {
+            background: #161b22;
+        }
+
+        .data-table td {
+            color: #c9d1d9;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(63, 185, 80, 0.15);
+            color: #3fb950;
+        }
+
+        .badge-warning {
+            background: rgba(210, 153, 34, 0.15);
+            color: #d29922;
+        }
+
+        .badge-danger {
+            background: rgba(248, 81, 73, 0.15);
+            color: #f85149;
+        }
+
+        /* Log Console */
+        .console {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .console-line {
+            margin-bottom: 4px;
+            color: #8b949e;
+        }
+
+        .console-line.success { color: #3fb950; }
+        .console-line.error { color: #f85149; }
+        .console-line.info { color: #58a6ff; }
+        .console-line.warn { color: #d29922; }
+
+        .console-line .timestamp {
+            color: #484f58;
+            margin-right: 8px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #c9d1d9;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+
+        .quick-action-btn:hover {
+            border-color: #58a6ff;
+            background: #161b22;
+        }
+
+        .quick-action-btn i {
+            font-size: 20px;
+            color: #58a6ff;
+            width: 24px;
+            text-align: center;
+        }
+
+        .quick-action-btn span {
+            font-weight: 500;
+        }
+
+        .quick-action-btn small {
+            display: block;
+            font-size: 11px;
+            color: #8b949e;
+            margin-top: 2px;
+        }
+
+        /* Loading */
+        .loading-bar {
+            width: 100%;
+            height: 4px;
+            background: #21262d;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .loading-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: #238636;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        .loading-text {
+            font-size: 13px;
+            color: #8b949e;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        /* Result Box */
+        .result-box {
+            display: none;
+            padding: 20px;
+            background: rgba(35, 134, 54, 0.1);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+            border-radius: 8px;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .result-box.active {
+            display: block;
+        }
+
+        .result-box h4 {
+            color: #3fb950;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .result-box p {
+            color: #8b949e;
+            font-size: 13px;
+        }
+
+        /* Hidden */
+        .hidden { display: none !important; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main-content { margin-left: 0; padding: 16px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1><i class="fas fa-shield-halved"></i> Yuka Unbanned</h1>
+            <p>Admin Panel v2.1.0</p>
+        </div>
+        <nav class="nav-menu">
+            <div class="nav-label">Menu</div>
+            <button class="nav-item active" onclick="showPage('dashboard')">
+                <i class="fas fa-gauge"></i> Dashboard
+            </button>
+            <button class="nav-item" onclick="showPage('unban')">
+                <i class="fas fa-unlock"></i> Unban Tool
+            </button>
+            <button class="nav-item" onclick="showPage('hardcase')">
+                <i class="fas fa-lock"></i> Hard Case (200K)
+            </button>
+            <button class="nav-item" onclick="showPage('pricecheck')">
+                <i class="fas fa-search-dollar"></i> Cek Harga
+            </button>
+            <button class="nav-item" onclick="showPage('tokens')">
+                <i class="fas fa-key"></i> Token Manager
+            </button>
+            <button class="nav-item" onclick="showPage('orders')">
+                <i class="fas fa-list"></i> Orders
+            </button>
+            <div class="nav-divider"></div>
+            <div class="nav-label">System</div>
+            <button class="nav-item" onclick="showPage('logs')">
+                <i class="fas fa-terminal"></i> Logs
+            </button>
+            <button class="nav-item" onclick="showPage('settings')">
+                <i class="fas fa-gear"></i> Settings
+            </button>
+            <div class="nav-divider"></div>
+            <button class="nav-item" style="color: #f85149;" onclick="alert('Logout berhasil')">
+                <i class="fas fa-right-from-bracket"></i> Logout
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- DASHBOARD PAGE -->
+        <div id="page-dashboard" class="page">
+            <div class="page-header">
+                <div>
+                    <h2>Dashboard</h2>
+                    <div class="breadcrumb">Overview / Dashboard</div>
+                </div>
+                <span class="status-badge online">System Online</span>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Unbanned</div>
+                    <div class="stat-value" id="stat-total">124</div>
+                    <div class="stat-change up"><i class="fas fa-check"></i> Real-time count</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pending Orders</div>
+                    <div class="stat-value" id="stat-pending">8</div>
+                    <div class="stat-change down"><i class="fas fa-clock"></i> Menunggu diproses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Success Rate</div>
+                    <div class="stat-value">100%</div>
+                    <div class="stat-change up"><i class="fas fa-check"></i> Perfect</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Hard Case (200K)</div>
+                    <div class="stat-value" id="stat-hardcase">5</div>
+                    <div class="stat-change up"><i class="fas fa-lock"></i> Akun susah</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" onclick="showPage('unban')">
+                            <i class="fas fa-unlock"></i>
+                            <div>
+                                <span>Direct Unban</span>
+                                <small>Unban tanpa bayar & token</small>
+                            </div>
+                        </button>
+                        <button class="quick-action-btn" onclick="showPage('hardcase')">
+                            <i class="fas fa-lock"></i>
+                            <div>
+                                <span>Hard Case 200K</span>
+                                <small>Akun susah kebuka</small>
+                            </div>
+                        </button>
+                        <button class="quick-action-btn" onclick="showPage('tokens')">
+                            <i class="fas fa-key"></i>
+                            <div>
+                                <span>Generate Token</span>
+                                <small>Buat token untuk customer</small>
+                            </div>
+                        </button>
+                        <button class="quick-action-btn" onclick="showPage('orders')">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <span>Pending Orders</span>
+                                <small>8 order menunggu</small>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-terminal"></i> System Logs</h3>
+                    <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="clearLogs()">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <div class="console" id="console">
+                        <div class="console-line"><span class="timestamp">10:37:02</span><span class="info">[INFO]</span> Admin panel initialized</div>
+                        <div class="console-line"><span class="timestamp">10:37:02</span><span class="success">[OK]</span> Database connection established</div>
+                        <div class="console-line"><span class="timestamp">10:37:03</span><span class="info">[INFO]</span> Token system loaded (3 tokens active)</div>
+                        <div class="console-line"><span class="timestamp">10:37:03</span><span class="success">[OK]</span> All game APIs responding</div>
+                        <div class="console-line"><span class="timestamp">10:37:04</span><span class="warn">[WARN]</span> 8 pending orders detected</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UNBAN TOOL PAGE -->
+        <div id="page-unban" class="page hidden">
+            <div class="page-header">
+                <div>
+                    <h2>Unban Tool</h2>
+                    <div class="breadcrumb">Tools / Direct Unban</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-unlock"></i> Direct Unban (Admin Only)</h3>
+                    <span class="badge badge-success">Bypass All</span>
+                </div>
+                <div class="panel-body">
+                    <form id="adminUnbanForm" onsubmit="adminUnban(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Pilih Game</label>
+                                <select class="form-control" id="adminGame" required>
+                                    <option value="">-- Pilih Game --</option>
+                                    <option value="ml">Mobile Legends</option>
+                                    <option value="ff">Free Fire</option>
+                                    <option value="cod">Call of Duty Mobile</option>
+                                    <option value="pubg">PUBG Mobile</option>
+                                    <option value="lol">League of Legends / Wild Rift</option>
+                                    <option value="valo">Valorant</option>
+                                    <option value="genshin">Genshin Impact</option>
+                                    <option value="fortnite">Fortnite</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>User ID</label>
+                                <input type="text" class="form-control" id="adminUserId" placeholder="Masukkan User ID" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" class="form-control" id="adminUsername" placeholder="Masukkan username" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Jenis Ban</label>
+                                <select class="form-control" id="adminBanType">
+                                    <option value="permanent">Permanent</option>
+                                    <option value="temporary">Temporary</option>
+                                    <option value="hwid">HWID Ban</option>
+                                    <option value="shadow">Shadow Ban</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Catatan (Opsional)</label>
+                            <textarea class="form-control" id="adminNote" placeholder="Tambahkan catatan jika perlu..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-unlock"></i> EXECUTE UNBAN
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-lg" onclick="resetAdminForm()">
+                                <i class="fas fa-rotate-left"></i> Reset
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="loading-bar" id="adminLoadingBar" style="display: none;">
+                        <div class="loading-bar-fill" id="adminLoadingFill"></div>
+                    </div>
+                    <div class="loading-text" id="adminLoadingText" style="display: none;">Processing...</div>
+
+                    <div class="result-box" id="adminResult">
+                        <i class="fas fa-check-circle" style="font-size: 48px; color: #3fb950; margin-bottom: 12px;"></i>
+                        <h4>UNBAN BERHASIL!</h4>
+                        <p>Akun <strong id="resultUser"></strong> telah berhasil di-unban dari <strong id="resultGame"></strong>.</p>
+                        <p style="margin-top: 8px; font-size: 12px; color: #484f58;">Timestamp: <span id="resultTime"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-history"></i> Recent Unbans</h3>
+                </div>
+                <div class="panel-body" style="padding: 0;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Game</th>
+                                <th>User ID</th>
+                                <th>Username</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentUnbans">
+                            <tr>
+                                <td>Mobile Legends</td>
+                                <td>123456789</td>
+                                <td>ProPlayer123</td>
+                                <td>Permanent</td>
+                                <td><span class="badge badge-success">Success</span></td>
+                                <td>10:30:15</td>
+                            </tr>
+                            <tr>
+                                <td>Free Fire</td>
+                                <td>987654321</td>
+                                <td>FFLegend</td>
+                                <td>HWID</td>
+                                <td><span class="badge badge-success">Success</span></td>
+                                <td>10:25:42</td>
+                            </tr>
+                            <tr>
+                                <td>PUBG Mobile</td>
+                                <td>456789123</td>
+                                <td>ChickenDinner</td>
+                                <td>Permanent</td>
+                                <td><span class="badge badge-success">Success</span></td>
+                                <td>10:18:09</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- HARD CASE PAGE -->
+        <div id="page-hardcase" class="page hidden">
+            <div class="page-header">
+                <div>
+                    <h2>Hard Case (200K)</h2>
+                    <div class="breadcrumb">Tools / Akun Susah Kebuka</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-lock"></i> Unban Akun Susah (Rp 200.000)</h3>
+                    <span class="badge badge-warning">Premium</span>
+                </div>
+                <div class="panel-body">
+                    <p style="color: #8b949e; margin-bottom: 16px; font-size: 14px;">
+                        <i class="fas fa-info-circle"></i> 
+                        Fitur ini untuk akun yang sudah dicoba unban biasa tapi gagal. Proses lebih dalam dengan metode khusus.
+                    </p>
+
+                    <form id="hardcaseForm" onsubmit="hardcaseUnban(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Pilih Game</label>
+                                <select class="form-control" id="hardGame" required>
+                                    <option value="">-- Pilih Game --</option>
+                                    <option value="ml">Mobile Legends</option>
+                                    <option value="ff">Free Fire</option>
+                                    <option value="cod">Call of Duty Mobile</option>
+                                    <option value="pubg">PUBG Mobile</option>
+                                    <option value="lol">League of Legends / Wild Rift</option>
+                                    <option value="valo">Valorant</option>
+                                    <option value="genshin">Genshin Impact</option>
+                                    <option value="fortnite">Fortnite</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>User ID</label>
+                                <input type="text" class="form-control" id="hardUserId" placeholder="Masukkan User ID" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" class="form-control" id="hardUsername" placeholder="Masukkan username" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Jenis Ban</label>
+                                <select class="form-control" id="hardBanType">
+                                    <option value="super-ban">Super Ban (Hard)</option>
+                                    <option value="device-ban">Device Ban</option>
+                                    <option value="ip-ban">IP Ban</option>
+                                    <option value="hwid-permanent">HWID Permanent</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Keterangan Susahnya (Opsional)</label>
+                            <textarea class="form-control" id="hardNote" placeholder="Contoh: Sudah coba 3x unban biasa gagal, akun sudah banned 2 tahun..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fas fa-bolt"></i> EXECUTE HARDCASE (200K)
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-lg" onclick="resetHardForm()">
+                                <i class="fas fa-rotate-left"></i> Reset
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="loading-bar" id="hardLoadingBar" style="display: none;">
+                        <div class="loading-bar-fill" id="hardLoadingFill"></div>
+                    </div>
+                    <div class="loading-text" id="hardLoadingText" style="display: none;">Processing hardcase...</div>
+
+                    <div class="result-box" id="hardResult" style="background: rgba(210, 153, 34, 0.1); border-color: rgba(210, 153, 34, 0.3);">
+                        <i class="fas fa-check-circle" style="font-size: 48px; color: #d29922; margin-bottom: 12px;"></i>
+                        <h4 style="color: #d29922;">HARDCASE BERHASIL!</h4>
+                        <p>Akun <strong id="hardResultUser"></strong> telah berhasil di-unban (Hard Case).</p>
+                        <p style="margin-top: 8px; font-size: 12px; color: #484f58;">Biaya: Rp 200.000 | Timestamp: <span id="hardResultTime"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-history"></i> Hard Case History</h3>
+                </div>
+                <div class="panel-body" style="padding: 0;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Game</th>
+                                <th>User ID</th>
+                                <th>Username</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hardcaseHistory">
+                            <tr>
+                                <td>Valorant</td>
+                                <td>777888999</td>
+                                <td>HardCase01</td>
+                                <td>super-ban</td>
+                                <td>Rp 200.000</td>
+                                <td><span class="badge badge-success">Success</span></td>
+                                <td>09:45:22</td>
+                            </tr>
+                            <tr>
+                                <td>Genshin Impact</td>
+                                <td>333444555</td>
+                                <td>HardCase02</td>
+                                <td>device-ban</td>
+                                <td>Rp 200.000</td>
+                                <td><span class="badge badge-success">Success</span></td>
+                                <td>09:30:11</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRICE CHECKER PAGE -->
+        <div id="page-pricecheck" class="page hidden">
+            <div class="page-header">
+                <div>
+                    <h2>Cek Harga Unban</h2>
+                    <div class="breadcrumb">Tools / Price Checker</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-search-dollar"></i> Cek Harga Berdasarkan Region & ID</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Region</label>
+                            <select class="form-control" id="priceRegion" onchange="checkPrice()">
+                                <option value="">-- Pilih Region --</option>
+                                <option value="indonesia">Indonesia (ID)</option>
+                                <option value="global">Global / Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>User ID</label>
+                            <input type="text" class="form-control" id="priceUserId" placeholder="Masukkan User ID" oninput="checkPrice()">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Pilih Game</label>
+                            <select class="form-control" id="priceGame" onchange="checkPrice()">
+                                <option value="">-- Pilih Game --</option>
+                                <option value="ml">Mobile Legends</option>
+                                <option value="ff">Free Fire</option>
+                                <option value="cod">Call of Duty Mobile</option>
+                                <option value="pubg">PUBG Mobile</option>
+                                <option value="lol">League of Legends / Wild Rift</option>
+                                <option value="valo">Valorant</option>
+                                <option value="genshin">Genshin Impact</option>
+                                <option value="fortnite">Fortnite</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="priceResultBox" style="display: none; margin-top: 20px; padding: 20px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <div>
+                                <div style="font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Estimasi Harga</div>
+                                <div id="priceAmount" style="font-size: 32px; font-weight: 700; color: #f0f6fc;"></div>
+                            </div>
+                            <div id="priceBadge" style="padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;"></div>
+                        </div>
+                        <div style="border-top: 1px solid #30363d; padding-top: 16px;">
+                            <div style="font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+                                <i class="fas fa-exclamation-triangle"></i> Why This Account is Difficult to Unban
+                            </div>
+                            <div id="priceReason" style="font-size: 14px; color: #c9d1d9; line-height: 1.6;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-info-circle"></i> Price Guide</h3>
+                </div>
+                <div class="panel-body">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                        <div style="background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 16px;">
+                            <div style="font-size: 14px; font-weight: 600; color: #f0f6fc; margin-bottom: 8px;">
+                                <i class="fas fa-flag" style="color: #3fb950;"></i> Indonesia (ID)
+                            </div>
+                            <div style="font-size: 13px; color: #8b949e; line-height: 1.6;">
+                                ID 10+ digits: Rp 50.000 - Rp 100.000<br>
+                                Random price between 50K - 100K
+                            </div>
+                        </div>
+                        <div style="background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 16px;">
+                            <div style="font-size: 14px; font-weight: 600; color: #f0f6fc; margin-bottom: 8px;">
+                                <i class="fas fa-globe" style="color: #58a6ff;"></i> Global / Other Regions
+                            </div>
+                            <div style="font-size: 13px; color: #8b949e; line-height: 1.6;">
+                                Price: $10 - $30 USD<br>
+                                Random price between $10 - $30
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOKEN MANAGER PAGE -->
+        <div id="page-tokens" class="page hidden">
+            <div class="page-header">
+                <div>
+                    <h2>Token Manager</h2>
+                    <div class="breadcrumb">System / Token Manager</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-key"></i> Active Tokens</h3>
+                    <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="generateNewToken()">
+                        <i class="fas fa-plus"></i> Generate New
+                    </button>
+                </div>
+                <div class="panel-body" style="padding: 0;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Package</th>
+                                <th>Token</th>
+                                <th>Price</th>
+                                <th>Used</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>VIP Permanent</td>
+                                <td style="font-family: monospace; font-size: 11px;">yhurftuijgfdfgavsvgsjbh...</td>
+                                <td>Rp 100.000</td>
+                                <td>47x</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>Permanent Biasa</td>
+                                <td style="font-family: monospace; font-size: 11px;">Kjjajhjgtsfyfeghv3h56...</td>
+                                <td>Rp 50.000</td>
+                                <td>128x</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>Harian</td>
+                                <td style="font-family: monospace; font-size: 11px;">hbcbdghfsiye76354rr42...</td>
+                                <td>Rp 40.000</td>
+                                <td>312x</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-copy"></i> Copy Token</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Pilih Paket</label>
+                            <select class="form-control" id="copyTokenSelect">
+                                <option value="vip">VIP Permanent - Rp 100.000</option>
+                                <option value="perm">Permanent Biasa - Rp 50.000</option>
+                                <option value="daily">Harian - Rp 40.000</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="copyToken()">
+                        <i class="fas fa-copy"></i> Copy to Clipboard
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ORDERS PAGE -->
+        <div id="page-orders" class="page hidden">
+            <div class="page-header">
+                <div>
+                    <h2>Orders</h2>
+                    <div class="breadcrumb">Management / Orders</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-list"></i> Pending Orders</h3>
+                    <span class="badge badge-warning">8 Pending</span>
+                </div>
+                <div class="panel-body" style="padding: 0;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Game</th>
+                                <th>User ID</th>
+                                <th>Package</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <tr>
+                                <td>#1248</td>
+                                <td>Mobile Legends</td>
+                                <td>9988776655</td>
+                                <td>VIP Permanent</td>
+                                <td>Rp 100.000</td>
+                                <td><span class="badge badge-warning">Waiting Token</span></td>
+                                <td><button class="btn btn-primary" style="padding: 4px 10px; font-size: 11px;">Process</button></td>
+                            </tr>
+                            <tr>
+                                <td>#1247</td>
+                                <td>Free Fire</td>
+                                <td>1122334455</td>
+                                <td>Permanent Biasa</td>
+                                <td>Rp 50.000</td>
+                                <td><span class="badge badge-warning">Waiting Token</span></td>
+                                <td><button class="btn btn-primary" style="padding: 4px 10px; font-size: 11px;">Process</button></td>
+                            </tr>
+                            <tr>
+                                <td>#1246</td>
+                                <td>PUBG Mobile</td>
+                                <td>5566778899</td>
+                                <td>Harian</td>
+                                <td>Rp 40.000</td>
+                                <td><span class="badge badge-warning">Waiting Token</span></td>
+                                <td><button class="btn btn-primary" style="padding: 4px 10px; font-size: 11px;">Process</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOGS PAGE -->
+        <div id="page-logs" class="page hidden">
+            <div class="page-header">
+                <div>
+                    <h2>System Logs</h2>
+                    <div class="breadcrumb">System / Logs</div>
+                </div>
+                <button class="btn btn-secondary" onclick="clearLogs()">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+            </div>
+
+            <div class="panel">
+                <div class="panel-body">
+                    <div class="console" id="logsConsole" style="max-height: 500px;">
+                        <div class="console-line"><span class="timestamp">2026-05-17 10:37:02</span><span class="info">[INFO]</span> System startup complete</div>
+                        <div class="console-line"><span class="timestamp">2026-05-17 10:37:02</span><span class="success">[OK]</span> Database connected: mysql://localhost/yuka_db</div>
+                        <div class="console-line"><span class="timestamp">2026-05-17 10:37:03</span><span class="info">[INFO]</span> Token manager initialized (3 tokens)</div>
+                        <div class="console-line"><span class="timestamp">2026-05-17 10:37:03</span><span class="success">[OK]</span> Game API: Mobile Legends - OK</div>
+                        <div class="console-line"><span class="timestamp">2026-05-17 10:37:03</span><span class="success">[OK]</span> Game API: Free Fire - OK</div>
+                        <div class="console-line"><span class="timestamp">2026-05-17 10:37:03</span><span class="success">[OK]</span> Game API: PUBG Mobile - OK</div>
+                        <div class="console-line"><span class="timestamp">2026-05-17 10:37:04</span><span class="warn">[WARN]</span> 8 pending orders in queue</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETTINGS PAGE -->
+        <div id="page-settings" class="page hidden">
+            <div class="page-header">
+                <div>
+                    <h2>Settings</h2>
+                    <div class="breadcrumb">System / Settings</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-sliders"></i> General Settings</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Panel Title</label>
+                            <input type="text" class="form-control" value="Yuka Unbanned - Admin Panel">
+                        </div>
+                        <div class="form-group">
+                            <label>Maintenance Mode</label>
+                            <select class="form-control">
+                                <option>Off</option>
+                                <option>On</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>TikTok URL</label>
+                            <input type="text" class="form-control" value="@yuka.unbanned">
+                        </div>
+                        <div class="form-group">
+                            <label>Instagram URL</label>
+                            <input type="text" class="form-control" value="@yukaunbanned">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Data storage
+        let totalUnbanned = 124;
+        let totalHardcase = 5;
+        let unbanHistory = [];
+        let hardcaseHistory = [];
+
+        const tokens = {
+            vip: 'yhurftuijgfdfgavsvgsjbh374856y56784tio6875t98796yht6',
+            perm: 'Kjjajhjgtsfyfeghv3h562562574tgdghbgbhfdhjbjkffjksuy766265',
+            daily: 'hbcbdghfsiye76354rr42re6ttsghsbgdbcgcbddjncjnmknjd77877566363654545gdfggnnjvjfnkduidrhgytrftyefgsdydfvgbhjbvdjnghjoihjsdreftdrtsfegcvxudrfvhtuygtcydrfthgbciuvyftjdubgithv'
+        };
+
+        const gameNames = {
+            ml: 'Mobile Legends',
+            ff: 'Free Fire',
+            cod: 'Call of Duty Mobile',
+            pubg: 'PUBG Mobile',
+            lol: 'League of Legends / Wild Rift',
+            valo: 'Valorant',
+            genshin: 'Genshin Impact',
+            fortnite: 'Fortnite'
+        };
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById('page-' + pageId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        function addLog(type, message) {
+            const console = document.getElementById('console');
+            const logsConsole = document.getElementById('logsConsole');
+            const now = new Date();
+            const time = now.toTimeString().split(' ')[0];
+            const dateTime = now.toISOString().split('T')[0] + ' ' + time;
+
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            line.innerHTML = `<span class="timestamp">${time}</span><span class="${type}">[${type.toUpperCase()}]</span> ${message}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+
+            const logLine = document.createElement('div');
+            logLine.className = 'console-line';
+            logLine.innerHTML = `<span class="timestamp">${dateTime}</span><span class="${type}">[${type.toUpperCase()}]</span> ${message}`;
+            logsConsole.appendChild(logLine);
+            logsConsole.scrollTop = logsConsole.scrollHeight;
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').textContent = totalUnbanned.toLocaleString();
+            document.getElementById('stat-hardcase').textContent = totalHardcase.toLocaleString();
+        }
+
+        function adminUnban(e) {
+            e.preventDefault();
+
+            const game = document.getElementById('adminGame').value;
+            const userId = document.getElementById('adminUserId').value;
+            const username = document.getElementById('adminUsername').value;
+            const banType = document.getElementById('adminBanType').value;
+
+            if (!game || !userId || !username) return;
+
+            const loadingBar = document.getElementById('adminLoadingBar');
+            const loadingFill = document.getElementById('adminLoadingFill');
+            const loadingText = document.getElementById('adminLoadingText');
+            const result = document.getElementById('adminResult');
+
+            loadingBar.style.display = 'block';
+            loadingText.style.display = 'block';
+            result.classList.remove('active');
+
+            addLog('info', `Starting unban process for ${gameNames[game]} - ${userId}`);
+
+            let progress = 0;
+            const steps = [
+                'Connecting to game server...',
+                'Authenticating admin credentials...',
+                'Bypassing payment verification...',
+                'Bypassing token verification...',
+                'Fetching account data...',
+                'Removing ban flag...',
+                'Clearing blacklist entries...',
+                'Generating new session...',
+                'Verifying account status...',
+                'Finalizing...'
+            ];
+
+            const interval = setInterval(() => {
+                progress += 10;
+                loadingFill.style.width = progress + '%';
+
+                const stepIndex = Math.floor((progress / 100) * steps.length);
+                if (steps[stepIndex]) {
+                    loadingText.textContent = steps[stepIndex];
+                    addLog('info', steps[stepIndex]);
+                }
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        loadingBar.style.display = 'none';
+                        loadingText.style.display = 'none';
+                        result.classList.add('active');
+
+                        document.getElementById('resultUser').textContent = username;
+                        document.getElementById('resultGame').textContent = gameNames[game];
+                        document.getElementById('resultTime').textContent = new Date().toLocaleString('id-ID');
+
+                        // Update counter
+                        totalUnbanned++;
+                        updateStats();
+
+                        // Add to history
+                        const historyItem = {
+                            game: gameNames[game],
+                            userId: userId,
+                            username: username,
+                            type: banType.charAt(0).toUpperCase() + banType.slice(1),
+                            time: new Date().toTimeString().split(' ')[0]
+                        };
+                        unbanHistory.unshift(historyItem);
+
+                        addLog('success', `UNBAN SUCCESS: ${gameNames[game]} - ${userId} (${username})`);
+
+                        // Update recent unbans table
+                        updateRecentUnbans();
+
+                    }, 300);
+                }
+            }, 200);
+        }
+
+        function updateRecentUnbans() {
+            const tbody = document.getElementById('recentUnbans');
+            if (unbanHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #484f58; padding: 24px;">Belum ada data unban</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = unbanHistory.map(item => `
+                <tr>
+                    <td>${item.game}</td>
+                    <td>${item.userId}</td>
+                    <td>${item.username}</td>
+                    <td>${item.type}</td>
+                    <td><span class="badge badge-success">Success</span></td>
+                    <td>${item.time}</td>
+                </tr>
+            `).join('');
+        }
+
+        function resetAdminForm() {
+            document.getElementById('adminUnbanForm').reset();
+            document.getElementById('adminResult').classList.remove('active');
+            document.getElementById('adminLoadingBar').style.display = 'none';
+            document.getElementById('adminLoadingText').style.display = 'none';
+        }
+
+        // HARDCASE FUNCTION
+        function hardcaseUnban(e) {
+            e.preventDefault();
+
+            const game = document.getElementById('hardGame').value;
+            const userId = document.getElementById('hardUserId').value;
+            const username = document.getElementById('hardUsername').value;
+            const banType = document.getElementById('hardBanType').value;
+
+            if (!game || !userId || !username) return;
+
+            const loadingBar = document.getElementById('hardLoadingBar');
+            const loadingFill = document.getElementById('hardLoadingFill');
+            const loadingText = document.getElementById('hardLoadingText');
+            const result = document.getElementById('hardResult');
+
+            loadingBar.style.display = 'block';
+            loadingText.style.display = 'block';
+            result.classList.remove('active');
+
+            addLog('warn', `Starting HARDCASE for ${gameNames[game]} - ${userId} (Rp 200.000)`);
+
+            let progress = 0;
+            const steps = [
+                'Connecting to game server...',
+                'Authenticating admin credentials...',
+                'Deep scan account status...',
+                'Bypassing super ban detection...',
+                'Clearing device fingerprint...',
+                'Resetting HWID registry...',
+                'Removing deep ban flag...',
+                'Generating new secure session...',
+                'Verifying account integrity...',
+                'Finalizing hardcase...'
+            ];
+
+            const interval = setInterval(() => {
+                progress += 10;
+                loadingFill.style.width = progress + '%';
+
+                const stepIndex = Math.floor((progress / 100) * steps.length);
+                if (steps[stepIndex]) {
+                    loadingText.textContent = steps[stepIndex];
+                    addLog('info', steps[stepIndex]);
+                }
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        loadingBar.style.display = 'none';
+                        loadingText.style.display = 'none';
+                        result.classList.add('active');
+
+                        document.getElementById('hardResultUser').textContent = username;
+                        document.getElementById('hardResultTime').textContent = new Date().toLocaleString('id-ID');
+
+                        // Update counter
+                        totalHardcase++;
+                        updateStats();
+
+                        // Add to history
+                        const historyItem = {
+                            game: gameNames[game],
+                            userId: userId,
+                            username: username,
+                            type: banType,
+                            amount: 'Rp 200.000',
+                            time: new Date().toTimeString().split(' ')[0]
+                        };
+                        hardcaseHistory.unshift(historyItem);
+
+                        addLog('success', `HARDCASE SUCCESS: ${gameNames[game]} - ${userId} (${username}) - Rp 200.000`);
+
+                        // Update hardcase table
+                        updateHardcaseHistory();
+
+                    }, 300);
+                }
+            }, 300); // Lebih lambat karena hardcase
+        }
+
+        function updateHardcaseHistory() {
+            const tbody = document.getElementById('hardcaseHistory');
+            if (hardcaseHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #484f58; padding: 24px;">Belum ada hardcase</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = hardcaseHistory.map(item => `
+                <tr>
+                    <td>${item.game}</td>
+                    <td>${item.userId}</td>
+                    <td>${item.username}</td>
+                    <td>${item.type}</td>
+                    <td>${item.amount}</td>
+                    <td><span class="badge badge-success">Success</span></td>
+                    <td>${item.time}</td>
+                </tr>
+            `).join('');
+        }
+
+        function resetHardForm() {
+            document.getElementById('hardcaseForm').reset();
+            document.getElementById('hardResult').classList.remove('active');
+            document.getElementById('hardLoadingBar').style.display = 'none';
+            document.getElementById('hardLoadingText').style.display = 'none';
+        }
+
+        function copyToken() {
+            const select = document.getElementById('copyTokenSelect').value;
+            const token = tokens[select];
+            navigator.clipboard.writeText(token).then(() => {
+                alert('Token copied to clipboard!');
+                addLog('info', 'Token copied to clipboard');
+            });
+        }
+
+        function generateNewToken() {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let token = '';
+            for (let i = 0; i < 64; i++) {
+                token += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            alert('New token generated: ' + token.substring(0, 20) + '...');
+            addLog('info', 'New token generated');
+        }
+
+        function clearLogs() {
+            document.getElementById('console').innerHTML = '';
+            document.getElementById('logsConsole').innerHTML = '';
+            addLog('info', 'Logs cleared');
+        }
+
+        // PRICE CHECKER FUNCTIONS
+        const difficultyReasons = [
+            "This account has been flagged by the game's anti-cheat system for using malicious third-party files. The ban signature is deeply embedded in the server logs, requiring advanced bypass techniques to remove.",
+            "The account triggered a hardware-level ban (HWID) after suspicious file activity was detected. The system has blacklisted multiple device identifiers associated with this account, making standard unban methods ineffective.",
+            "Server-side detection found traces of modified game files and unauthorized DLL injections. The account is marked with a permanent 'cheater' tag that propagates across all regional servers.",
+            "This account was caught in a mass ban wave targeting users with tampered client files. The ban is reinforced by behavioral analysis algorithms that flag abnormal gameplay patterns linked to external tools.",
+            "The game's security team manually reviewed this account after reports of file manipulation. A deep system scan revealed corrupted game assets and unauthorized memory modifications, resulting in a super-ban status.",
+            "Account flagged for using obfuscated malicious payloads disguised as legitimate game files. The anti-cheat has logged multiple instances of file tampering across different game sessions, creating a persistent ban record.",
+            "This user account triggered kernel-level detection after suspicious driver files were found interacting with the game process. The ban extends beyond the account to associated IP ranges and device fingerprints.",
+            "The account was banned following detection of runtime file modifications during active gameplay. Server logs show repeated attempts to inject harmful scripts, resulting in a maximum severity ban classification.",
+            "Game integrity checks failed due to mismatched file hashes caused by unauthorized patching tools. The system has classified this as a high-risk account with reinforced ban protections across all game modes.",
+            "Anti-cheat telemetry detected anomalous file system behavior consistent with known cheat software. The account has been cross-referenced with a global blacklist and marked for permanent exclusion from ranked play."
+        ];
+
+        function checkPrice() {
+            const region = document.getElementById('priceRegion').value;
+            const userId = document.getElementById('priceUserId').value.trim();
+            const game = document.getElementById('priceGame').value;
+            const resultBox = document.getElementById('priceResultBox');
+            const amountEl = document.getElementById('priceAmount');
+            const badgeEl = document.getElementById('priceBadge');
+            const reasonEl = document.getElementById('priceReason');
+
+            if (!region || !userId || !game) {
+                resultBox.style.display = 'none';
+                return;
+            }
+
+            const idLength = userId.length;
+            let price, currency, badgeText, badgeColor;
+            let reasonIndex;
+
+            if (region === 'indonesia') {
+                // Indonesia: ID 10+ digits = Rp 50K or 100K (random)
+                if (idLength >= 10) {
+                    const prices = [50000, 100000];
+                    price = prices[Math.floor(Math.random() * prices.length)];
+                    currency = 'Rp ' + price.toLocaleString('id-ID');
+                    badgeText = price === 100000 ? 'HIGH DIFFICULTY' : 'MEDIUM DIFFICULTY';
+                    badgeColor = price === 100000 ? 'rgba(248, 81, 73, 0.15); color: #f85149;' : 'rgba(210, 153, 34, 0.15); color: #d29922;';
+                    // Higher price = longer/more severe reason
+                    reasonIndex = price === 100000 ? Math.floor(Math.random() * 5) + 5 : Math.floor(Math.random() * 5);
+                } else {
+                    // ID less than 10 digits - standard price
+                    price = 50000;
+                    currency = 'Rp 50.000';
+                    badgeText = 'STANDARD';
+                    badgeColor = 'rgba(63, 185, 80, 0.15); color: #3fb950;';
+                    reasonIndex = Math.floor(Math.random() * 3);
+                }
+            } else {
+                // Global/Other: $10, $20, or $30 (random)
+                const prices = [10, 20, 30];
+                price = prices[Math.floor(Math.random() * prices.length)];
+                currency = '$' + price + ' USD';
+                if (price === 30) {
+                    badgeText = 'EXTREME DIFFICULTY';
+                    badgeColor = 'rgba(248, 81, 73, 0.15); color: #f85149;';
+                    reasonIndex = Math.floor(Math.random() * 4) + 6;
+                } else if (price === 20) {
+                    badgeText = 'HIGH DIFFICULTY';
+                    badgeColor = 'rgba(210, 153, 34, 0.15); color: #d29922;';
+                    reasonIndex = Math.floor(Math.random() * 5) + 3;
+                } else {
+                    badgeText = 'MEDIUM DIFFICULTY';
+                    badgeColor = 'rgba(88, 166, 255, 0.15); color: #58a6ff;';
+                    reasonIndex = Math.floor(Math.random() * 4);
+                }
+            }
+
+            amountEl.textContent = currency;
+            badgeEl.textContent = badgeText;
+            badgeEl.style.cssText = `padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; background: ${badgeColor.split(';')[0]}; color: ${badgeColor.split('color:')[1].replace(';', '')}; border: 1px solid ${badgeColor.split('color:')[1].replace(';', '')}40;`;
+            reasonEl.textContent = difficultyReasons[reasonIndex];
+
+            resultBox.style.display = 'block';
+
+            addLog('info', `Price check: ${gameNames[game]} | ${region} | ID:${userId} | ${currency}`);
+        }
+    </script>
+</body>
+</html>
